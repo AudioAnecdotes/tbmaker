@@ -10,6 +10,8 @@ sub doManifest()
 	$dir=`pwd`;
 	if ($argc == 3)
 	{
+                print "args = @ARGV\n";
+
 		$DISTTYPE=$ARGV[0];
 		$TARLOCS=$ARGV[1];
 		$TMPDIR=$ARGV[2];
@@ -27,27 +29,32 @@ sub doManifest()
 
 	print "Reading manifest from file $MANIFEST in directory $dir\n";
 
-	while ($line=<FILE>)
+	LINELOOP: while ($line=<FILE>)
 	{
 		# skip blank lines
-#		next if ($line == '');
+		next LINELOOP if ($line eq '');
 
-		# check 1st char of line for # (comments) & ^ (skip)
-#		next if (substr($line,0,1) == '#');
-#		next if (substr($line,0,1) == '^');
+		# skip comments (#) and works-in-process (^)
+		next LINELOOP if (substr($line,0,1) eq "#");
+		next LINELOOP if (substr($line,0,1) eq "^");
 
 		# split fields on whitespace
 		@parts=split(/\s/,$line);
 
 		if (@parts[0]==$DISTTYPE)
 		{
-			if (!&processLine(@parts[1],"$TARLOCS/@parts[2]",@parts[3],$TMPDIR))
+			print "processing: $line\n";
+			if (!&processLine(@parts[1],"$TARLOCS@parts[2]",@parts[3],$TMPDIR))
 			{
 				print "\tError processing line\n";
 				exit -1;
 			}
 		}
 	}
+        continue {
+		if ($line eq '') { print "ignoring blank line\n"; }
+		if (substr($line,0,1) eq "#") { print "ignoring comment: $line\n"; }
+        }
 	return 0;
 }
 
@@ -72,6 +79,7 @@ sub processLine($$$$)
 	print "\tAdding file $local to tar file $tar to location $install\n";
 	$tarcmd="tar -uf $tar -C $tmploc $install 2>&1";
 	$errors=`$tarcmd`;
+	if ($errors) { print "tar err on file: $local\n"; }
 	return !length($errors);
 }
 
