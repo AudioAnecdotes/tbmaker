@@ -76,6 +76,10 @@ sub processLine($$$$)
 	$throwaway=`$mkdircmd`;
 	$cpcmd="cp -f $local $tmploc/$install 2>&1";
 	$throwaway=`$cpcmd`;
+	# all files (especially src) need to be writable
+	$chcmd="chmod a+w $tmploc/$install 2>&1";
+	$throwaway=`$chcmd`;
+	
 	print "cp -f $local $tmploc/$install \n";
 	print "\tAdding file $local to tar file $tar to location $install\n";
 	$tarcmd="tar -uf $tar -C $tmploc $install 2>&1";
