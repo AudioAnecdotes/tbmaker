@@ -104,19 +104,20 @@ sub processLine($$$$)
 		}
 	}
 
-    # Check DISTTYPE to see which volume it is encoding and use appropriate file
+    # Check tar to see which volume it is encoding and use appropriate file
+print "tar $tar";
     my $crfile="";
-    if ($DISTTYPE=~/1/)
+    if ($tar=~/1/)
     {
        $crfile=copyright;
     }
-    elsif ($DISTTYPE=~/2/)
+    elsif ($tar=~/2/)
     {
        $crfile=copyright2;
     }
     else
     {
-	print STDERR "tbmaker couldn't determine makefile version from $DISTTYPE\n";
+	print STDERR "tbmaker couldn't determine makefile version from $tar\n";
 	exit -1;
     }
 
