@@ -120,9 +120,35 @@ sub processLine($$$$)
 		return 2;
 	}
 
+        # all html files need to be in unix format 
+  	if ($local =~ m/\.(html$|htm$|css$|js$|cgi$)/) 
+	{
+		$dos2unix="dos2unix $tmploc/$install 2>&1";
+		$throwaway=`$dos2unix`;
+		print "$dos2unix\n";
+	}
+
+        # most files being served can't be executable
+  	if ($local =~ m/\.(m$|html$|htm$|wav$|gif$|pdf$|mpg$|mp3$|js$)/) 
+        {
+		$chcmd="chmod a-x $tmploc/$install 2>&1";
+		$throwaway=`$chcmd`;
+		print "$chcmd\n";
+        }
+
+        # some should be executable
+  	if ($local =~ m/\.(cgi$)/) 
+        {
+		$chcmd="chmod a+x $tmploc/$install 2>&1";
+		$throwaway=`$chcmd`;
+		print "$chcmd\n";
+        }
+
 	# all files (especially src) need to be writable
-	$chcmd="chmod a+w $tmploc/$install 2>&1";
+	$chcmd="chmod a+w+r $tmploc/$install 2>&1";
 	$throwaway=`$chcmd`;
+
+
 
 	# debugging info	
 	#print "cp -f $local $tmploc/$install \n";
