@@ -20,7 +20,7 @@ sub doManifest()
 	}
 	else
 	{
-		print STDERR "tbmaker expects 3 arguments!\n";
+		print STDERR "usage: tbmaker distribution archive tmpdir\n";
 		exit -1;
 	}
 	if (!open(FILE,"<$MANIFEST"))
@@ -42,7 +42,17 @@ sub doManifest()
 		# split fields on whitespace
 		@parts=split(/\s+/,$line);
 
-		if (@parts[0] eq "$DISTTYPE")
+		# first field could be a comma delimited list parse into array
+		@distributionList=split(/,/,@parts[0]);
+                my $element;
+		my $found=0;
+		foreach $distribution(@distributionList) {
+			if ($distribution eq "$DISTTYPE") {
+				$found=1;
+			}
+		}
+
+		if ($found)
 		{
 			print "processing: $line\n";
 			if (&processLine(@parts[1],"$TARLOCS@parts[2]",@parts[3],$TMPDIR))
