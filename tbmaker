@@ -45,7 +45,7 @@ sub doManifest()
 		if (@parts[0] eq "$DISTTYPE")
 		{
 			print "processing: $line\n";
-			if (!&processLine(@parts[1],"$TARLOCS@parts[2]",@parts[3],$TMPDIR))
+			if (&processLine(@parts[1],"$TARLOCS@parts[2]",@parts[3],$TMPDIR))
 			{
 				print "\tError processing line\n";
 				exit -1;
@@ -110,7 +110,7 @@ sub processLine($$$$)
 	$errors=`$cpcmd`;
 	if ($errors) { 
 		print "cp or cat err on file: $local\n"; 
-		return 1;
+		return 2;
 	}
 
 	# all files (especially src) need to be writable
@@ -125,8 +125,16 @@ sub processLine($$$$)
 	# finally, add file to tarball
 	$tarcmd="tar -uf $tar -C $tmploc $install 2>&1";
 	$errors=`$tarcmd`;
-	if ($errors) { print "tar err on file: $local\n"; }
-	return !length($errors);
+	if ($errors) { 
+           print "tar err on file: $local\n"; 
+           return(3);
+        }
+        else {
+	   return(0);
+        }
+           
+
+	# return !length($errors);
 }
 
 &doManifest();
