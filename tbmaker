@@ -98,15 +98,31 @@ sub processLine($$$$)
 	{
 		$path .= @tmpparts[$i];
 		$path .= '/';
-		if (@tmpparts[$i] eq 'aadevtree') 
+		if (@tmpparts[$i] eq 'aadevtree2') 
 		{ 
 			last ;
 		}
 	}
 
-    $copyrightsrc = $path . 'copyright.src';
-    $copyrightmak = $path . 'copyright.mak';
-	#print "copyright files = $copyrightsrc $copyrightmak \n";
+    # Check DISTTYPE to see which volume it is encoding and use appropriate file
+    my $crfile="";
+    if ($DISTTYPE=~/1/)
+    {
+       $crfile=copyright;
+    }
+    elsif ($DISTTYPE=~/2/)
+    {
+       $crfile=copyright2;
+    }
+    else
+    {
+	print STDERR "tbmaker couldn't determine makefile version from $DISTTYPE\n";
+	exit -1;
+    }
+
+    $copyrightsrc = $path . $crfile . '.src';
+    $copyrightmak = $path . $crfile . '.mak';
+	print "copyright files = $copyrightsrc $copyrightmak \n";
 
 	$mkdircmd="mkdir -p $tmploc/$p 2>&1";
 	$throwaway=`$mkdircmd`;
