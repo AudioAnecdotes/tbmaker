@@ -6,11 +6,13 @@ sub doManifest()
 	my $DISTTYPE="";
 	my $TARLOCS="";
 	my $TMPDIR="";
+
 	$argc=scalar(@ARGV);
 	$dir=`pwd`;
+
 	if ($argc == 3)
 	{
-                print "args = @ARGV\n";
+		print "args = @ARGV\n";
 
 		$DISTTYPE=$ARGV[0];
 		$TARLOCS=$ARGV[1];
@@ -28,7 +30,6 @@ sub doManifest()
 	}
 
 	print "Reading manifest from file $MANIFEST in directory $dir\n";
-
 	LINELOOP: while ($line=<FILE>)
 	{
 		# skip blank lines
@@ -52,9 +53,9 @@ sub doManifest()
 		}
 	}
         continue {
-		if ($line eq '') { print "ignoring blank line\n"; }
-		if (substr($line,0,1) eq "#") { print "ignoring comment: $line\n"; }
-		if (substr($line,0,1) eq "^") { print "ignoring pending: $line\n"; }
+		if ($line eq '') 		{ print "ignoring blank line\n"; }
+		if (substr($line,0,1) eq "#") 	{ print "ignoring comment: $line\n"; }
+		if (substr($line,0,1) eq "^") 	{ print "ignoring pending: $line\n"; }
         }
 	return 0;
 }
@@ -73,32 +74,43 @@ sub processLine($$$$)
 		$p="$p@dirparts[$i]/";
 	}
 
+    # locate copyright files created by copyright.pl
+	@tmpparts = split(/\//,$tmploc);
+	$path = '';
+    for($i=0; $i<scalar(@tmpparts);$i++)
+	{
+		$path .= @tmpparts[$i];
+		$path .= '/';
+		if (@tmpparts[$i] eq 'aadevtree') 
+		{ 
+			last ;
+		}
+	}
+
+    $copyrightsrc = $path . 'copyright.src';
+    $copyrightmak = $path . 'copyright.mak';
+	#print "copyright files = $copyrightsrc $copyrightmak \n";
+
 	$mkdircmd="mkdir -p $tmploc/$p 2>&1";
 	$throwaway=`$mkdircmd`;
 
-
-## problems with "cat":
-## 1. can't find ./copyright whether it's in aadevtree/ or aadevtree/bin
-## 2. shouldn't include "config.child.make.inc" (finds embedded ".c")
-##
-## other problems:
-## 1. from aadevtree, "make dist-src" crashes here:
-##    	make[1]: Entering directory `/cvsroot/aadevtree/src'
-##    	make[1]: Leaving directory `/cvsroot/aadevtree/src'
-##	make[1]: *** No rule to make target `dist'.  Stop.
-##	make: *** [dist-src] Error 2
-
-
-##	# copy file to tmp dir for tarring; source files get a copr notice prepended
-##	if ($local =~ m/\.(c|cpp|h)/) {
-##		$cpcmd="cat ./copyright $local > $tmploc/$install 2>&1"; 
-##	} else {
+  	# copy file to tmp dir for tarring; src|mak files get copyright notice
+  	if ($local =~ m/\.(c$|cpp$|h$)/) 
+	{
+  		$cpcmd="cat $copyrightsrc $local > $tmploc/$install 2>&1"; 
+  	} 
+	elsif ($local =~ m/\.(in$|mak$)/) 
+	{
+  		$cpcmd="cat $copyrightmak $local > $tmploc/$install 2>&1"; 
+  	} 
+	else 
+	{
 		$cpcmd="cp -f $local $tmploc/$install 2>&1";
-##	}
+  	}
 	$errors=`$cpcmd`;
 	if ($errors) { 
 		print "cp or cat err on file: $local\n"; 
-		return !length($errors);
+		return 1;
 	}
 
 	# all files (especially src) need to be writable
