@@ -121,7 +121,7 @@ sub processLine($$$$)
 	}
 
         # all html files need to be in unix format 
-  	if ($local =~ m/\.(html$|htm$|css$|js$|cgi$)/) 
+  	if ($local =~ m/\.(html$|htm$|css$|js$|cgi$|m$|txt$)/) 
 	{
 		$dos2unix="dos2unix $tmploc/$install 2>&1";
 		$throwaway=`$dos2unix`;
