@@ -1,0 +1,64 @@
+#!/usr/bin/perl
+
+sub doManifest()
+{
+	my $MANIFEST="";
+	my $TARLOCS="";
+	my $TMPDIR="";
+	$argc=scalar(@ARGV);
+	$dir=`pwd`;
+	if ($argc == 3)
+	{
+		$MANIFEST=$ARGV[0];
+		$TARLOCS=$ARGV[1];
+		$TMPDIR=$ARGV[2];
+	}
+	else
+	{
+		exit -1;
+	}
+	if (!open(FILE,"<$MANIFEST"))
+	{
+		print STDERR "Can't open manifest file $MANIFEST\n";
+		exit -1;
+	}
+
+	print "Reading manifest from file $MANIFEST in directory $dir\n";
+
+	while ($line=<FILE>)
+	{
+		@parts=split(/ /,$line);
+		if (!&processLine(@parts[0],"$TARLOCS/@parts[1]",@parts[2],$TMPDIR))
+		{
+			print "\tError processing line\n";
+			exit -1;
+		}
+	}
+	return 0;
+}
+
+sub processLine($$$$)
+{
+	my ($local,$tar,$install,$tmploc)=@_;
+	if (length($local)==0 || length($tar)==0 || length($install)==0)
+	{
+		return 1;
+	}
+	@dirparts=split(/\//,$install);
+	$p="";
+	for ($i=0;$i<scalar(@dirparts)-1;$i++)
+	{
+		$p="$p@dirparts[$i]/";
+	}
+	$mkdircmd="mkdir -p $tmploc/$p 2>&1";
+	$throwaway=`$mkdircmd`;
+	$cpcmd="cp -f $local $tmploc/$install 2>&1";
+	$throwaway=`$cpcmd`;
+	print "cp -f $local $tmploc/$install \n";
+	print "\tAdding file $local to tar file $tar to location $install\n";
+	$tarcmd="tar -uf $tar -C $tmploc $install 2>&1";
+	$errors=`$tarcmd`;
+	return !length($errors);
+}
+
+&doManifest();
