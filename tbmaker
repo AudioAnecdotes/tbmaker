@@ -41,7 +41,7 @@ sub doManifest()
 		# split fields on whitespace
 		@parts=split(/\s/,$line);
 
-		if (@parts[0]==$DISTTYPE)
+		if (@parts[0] eq "$DISTTYPE")
 		{
 			print "processing: $line\n";
 			if (!&processLine(@parts[1],"$TARLOCS@parts[2]",@parts[3],$TMPDIR))
@@ -54,6 +54,7 @@ sub doManifest()
         continue {
 		if ($line eq '') { print "ignoring blank line\n"; }
 		if (substr($line,0,1) eq "#") { print "ignoring comment: $line\n"; }
+		if (substr($line,0,1) eq "^") { print "ignoring pending: $line\n"; }
         }
 	return 0;
 }
