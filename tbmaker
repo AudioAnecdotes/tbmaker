@@ -67,6 +67,13 @@ sub processLine($$$$)
 	{
 		return 1;
 	}
+
+	$errors=system("test -e $local");
+	if ($errors) { 
+		print "tbmaker: $local not found\n"; 
+		return 2;
+	}
+
 	@dirparts=split(/\//,$install);
 	$p="";
 	for ($i=0;$i<scalar(@dirparts)-1;$i++)
