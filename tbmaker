@@ -39,7 +39,7 @@ sub doManifest()
 		next LINELOOP if (substr($line,0,1) eq "^");
 
 		# split fields on whitespace
-		@parts=split(/\s/,$line);
+		@parts=split(/\s+/,$line);
 
 		if (@parts[0] eq "$DISTTYPE")
 		{
