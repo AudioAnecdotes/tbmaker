@@ -107,13 +107,17 @@ sub processLine($$$$)
     # Check tar to see which volume it is encoding and use appropriate file
 print "tar $tar";
     my $crfile="";
-    if ($tar=~/1/)
+    if ($tar=~/v1/)
     {
        $crfile=copyright;
     }
-    elsif ($tar=~/2/)
+    elsif ($tar=~/v2/)
     {
        $crfile=copyright2;
+    }
+    elsif ($tar=~/v3/)
+    {
+       $crfile=copyright3;
     }
     else
     {
